@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Type Ahead 👀</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="icon" href="https://fav.farm/🔥" />
+  </head>
+  <body>
+    <form class="search-form">
+      <input type="text" class="search" placeholder="City or State" />
+      <ul class="suggestions">
+        <li>Filter for a city</li>
+        <li>or a state</li>
+      </ul>
+    </form>
+    <script>
+      /* Begin Code Explanation ////
+      ## Summary
+      The code snippet is responsible for fetching data from an API endpoint, filtering the data based on user input, and displaying the filtered results on the webpage.
+
+      ## Code Analysis
+      ### Inputs
+      - `wordToMatch`: A string representing the user's input in the search input field.
+      - `cities`: An array of objects representing the cities and states data fetched from the API endpoint.
+      ___
+      ### Flow
+      1. The code fetches data from the API endpoint using the `fetch` function and stores it in the `cities` array.
+      2. The `findMatches` function is called with the user's input (`wordToMatch`) and the `cities` array as arguments.
+      3. The `findMatches` function filters the `cities` array based on whether the city or state matches the user's input using a regular expression.
+      4. The `displayMatches` function is called whenever the user changes the input or presses a key in the search input field.
+      5. The `displayMatches` function calls the `findMatches` function to get the matching results and then generates HTML code for each matching result.
+      6. The generated HTML code is inserted into the `suggestions` element on the webpage, which displays the filtered results.
+      ___
+      ### Outputs
+      The code snippet updates the HTML content of the `suggestions` element on the webpage with the filtered results based on the user's input.
+      ___
+      //// End Code Explanation */
+
+      // Here is an improved version of the html code snippet:
+
+      //// Begin Code Snippet ////
+      const endpoint =
+        "https://gist.githubusercontent.com/Miserlou/c5cd8364bf9b2420bb29/raw/2bf258763cdddd704f8ffd3ea9a3e81d25e2c6f6/cities.json";
+      const cities = [];
+
+      fetch(endpoint)
+        .then((response) => response.json())
+        .then((data) => cities.push(...data));
+
+      function findMatches(wordToMatch, cities) {
+        const regex = new RegExp(wordToMatch, "gi");
+        return cities.filter(
+          (place) => place.city.match(regex) || place.state.match(regex)
+        );
+      }
+
+      function displayMatches() {
+        const matchArray = findMatches(this.value, cities);
+        const html = matchArray
+          .map((place) => {
+            const cityName = place.city.replace(
+              new RegExp(this.value, "gi"),
+              `<span class="hl">${this.value}</span>`
+            );
+            const stateName = place.state.replace(
+              new RegExp(this.value, "gi"),
+              `<span class="hl">${this.value}</span>`
+            );
+            return `
+            <li>
+              <span class="name">${cityName}, ${stateName}</span>
+              <span class="population">${place.population}</span>
+            </li>
+          `;
+          })
+          .join("");
+        suggestions.innerHTML = html;
+      }
+
+      const searchInput = document.querySelector(".search");
+      const suggestions = document.querySelector(".suggestions");
+
+      searchInput.addEventListener("change", displayMatches);
+      searchInput.addEventListener("keyup", displayMatches);
+    </script>
+  </body>
+</html>

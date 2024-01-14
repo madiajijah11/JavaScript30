@@ -60,11 +60,12 @@ const tableOfContentLink = document.querySelector(
 );
 const modal = document.getElementById("modal");
 
-tableOfContentLink.addEventListener("click", () => {
+tableOfContentLink.addEventListener("click", (event) => {
+  event.preventDefault();
   modal.classList.toggle("show");
 });
 
-const listItems = document.querySelectorAll(".menu li");
+const listItems = document.querySelectorAll(".menu li a");
 
 listItems.forEach((item, index) => {
   item.addEventListener("click", () => {
