@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>HTML5 Canvas</title>
+    <link rel="icon" href="https://fav.farm/🔥" />
+  </head>
+  <body>
+    <nav>
+      <label>
+        Line Width:
+        <input type="number" id="lineWidth" min="1" max="100" value="1" />
+      </label>
+      <button id="eraser">Eraser</button>
+      <label>
+        Eraser Size:
+        <input type="number" id="eraserSize" min="1" max="100" value="10" />
+      </label>
+      <label>
+        Eraser Opacity:
+        <input
+          type="range"
+          id="eraserOpacity"
+          min="0"
+          max="1"
+          step="0.1"
+          value="0"
+        />
+      </label>
+      <label>
+        Shape:
+        <select id="shape">
+          <option value="line">Line</option>
+          <option value="rectangle">Rectangle</option>
+          <option value="circle">Circle</option>
+        </select>
+      </label>
+      <label>
+        Line Cap:
+        <select id="lineCap">
+          <option value="butt">Butt</option>
+          <option value="round">Round</option>
+          <option value="square">Square</option>
+        </select>
+      </label>
+      <label>
+        Line Join:
+        <select id="lineJoin">
+          <option value="bevel">Bevel</option>
+          <option value="round">Round</option>
+          <option value="miter">Miter</option>
+        </select>
+      </label>
+      <label>
+        Stroke Style:
+        <input type="color" id="strokeStyle" value="#000000" />
+      </label>
+      <label>
+        Background Color:
+        <input type="color" id="backgroundColor" value="#ffffff" />
+      </label>
+      <button id="clear">Clear</button>
+      <button id="save">Save as Image</button>
+    </nav>
+    <canvas id="draw" width="800" height="800"></canvas>
+    <script>
+      const canvas = document.getElementById("draw");
+      const context = canvas.getContext("2d");
+      const eraserSizeInput = document.getElementById("eraserSize");
+      const eraserOpacityInput = document.getElementById("eraserOpacity");
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      let isDrawing = false;
+      let lastX = 0;
+      let lastY = 0;
+      let shape = "line";
+      let isErasing = false;
+      let eraserSize = 10;
+      let pencilSize = 1;
+      let imageData = null;
+      let eraserOpacity = 0;
+
+      const drawEraser = (e) => {
+        if (!isErasing) return;
+
+        context.lineWidth = isErasing ? eraserSize : pencilSize;
+        context.beginPath();
+        context.arc(e.offsetX, e.offsetY, eraserSize / 2, 0, Math.PI * 2);
+        context.fillStyle = `rgba(0, 0, 0, ${eraserOpacity})`; // Semi-transparent black
+        context.fill();
+      };
+
+      const draw = (e) => {
+        if (!isDrawing) return;
+
+        context.lineWidth = isErasing ? eraserSize : pencilSize;
+        context.beginPath();
+
+        switch (shape) {
+          case "rectangle":
+            context.rect(lastX, lastY, e.offsetX - lastX, e.offsetY - lastY);
+            break;
+          case "circle":
+            const radius = Math.sqrt(
+              Math.pow(lastX - e.offsetX, 2) + Math.pow(lastY - e.offsetY, 2)
+            );
+            context.arc(
+              lastX,
+              lastY,
+              radius,
+              pencilSize / 2,
+              Math.PI * 2,
+              true
+            );
+            break;
+          default: // line
+            context.moveTo(lastX, lastY);
+            context.lineTo(e.offsetX, e.offsetY);
+            break;
+        }
+
+        context.stroke();
+        [lastX, lastY] = [e.offsetX, e.offsetY];
+      };
+
+      const clearCanvas = () => {
+        context.clearRect(0, 0, canvas.width, canvas.height);
+      };
+
+      const saveAsImage = () => {
+        const dataUrl = canvas.toDataURL("image/png");
+        const a = document.createElement("a");
+        a.href = dataUrl;
+        a.download = "canvas.png";
+        a.click();
+      };
+
+      eraserOpacityInput.addEventListener("change", (e) => {
+        eraserOpacity = e.target.value;
+      });
+      eraserSizeInput.addEventListener("change", (e) => {
+        eraserSize = e.target.value;
+      });
+      eraserOpacityInput.addEventListener("change", (e) => {
+        eraserOpacity = e.target.value;
+      });
+
+      window.addEventListener("resize", () => {
+        imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        context.putImageData(imageData, 0, 0);
+      });
+
+      document.getElementById("shape").addEventListener("change", (e) => {
+        shape = e.target.value;
+      });
+      document.getElementById("eraser").addEventListener("click", () => {
+        const eraser = document.getElementById("eraser");
+        eraser.innerText = isErasing ? "Eraser" : "Pencil";
+        isErasing = !isErasing;
+        context.globalCompositeOperation = isErasing
+          ? "destination-out"
+          : "source-over";
+      });
+      document
+        .getElementById("backgroundColor")
+        .addEventListener("change", (e) => {
+          context.fillStyle = e.target.value;
+          context.fillRect(0, 0, canvas.width, canvas.height);
+        });
+      document.getElementById("save").addEventListener("click", saveAsImage);
+      document.getElementById("clear").addEventListener("click", clearCanvas);
+      document.getElementById("lineWidth").addEventListener("change", (e) => {
+        context.lineWidth = e.target.value;
+      });
+      document.getElementById("lineCap").addEventListener("change", (e) => {
+        context.lineCap = e.target.value;
+      });
+      document.getElementById("lineJoin").addEventListener("change", (e) => {
+        context.lineJoin = e.target.value;
+      });
+      document.getElementById("strokeStyle").addEventListener("change", (e) => {
+        context.strokeStyle = e.target.value;
+      });
+      document.addEventListener("mousemove", (e) => {
+        draw(e);
+        drawEraser(e);
+      });
+      document.addEventListener("mousedown", (e) => {
+        if (e.target.closest("nav")) {
+          return;
+        }
+
+        isDrawing = true;
+        [lastX, lastY] = [e.offsetX, e.offsetY];
+      });
+      document.addEventListener("mouseup", (e) => {
+        isDrawing = false;
+      });
+      document.addEventListener("mouseout", () => {
+        isDrawing = false;
+      });
+    </script>
+
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        font-family: "Arial", sans-serif;
+      }
+
+      nav {
+        display: flex;
+        justify-content: space-around;
+        background-color: #f0f0f0;
+        padding: 10px 0;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      nav label,
+      nav button {
+        margin: 0 10px;
+      }
+
+      nav input,
+      nav select {
+        margin-left: 5px;
+      }
+
+      button {
+        padding: 5px 10px;
+        border: none;
+        border-radius: 5px;
+        background: linear-gradient(to right, #ff9966, #ff5e62);
+        color: white;
+        cursor: pointer;
+        transition: background 0.3s;
+      }
+
+      button:hover {
+        background: linear-gradient(to right, #ff5e62, #ff9966);
+      }
+
+      canvas {
+        position: absolute;
+        width: 100vw;
+        height: 100vh;
+      }
+    </style>
+  </body>
+</html>
