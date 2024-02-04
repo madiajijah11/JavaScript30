@@ -3,9 +3,6 @@ function changeIframeSource(newSource) {
   iframe.src = newSource;
 }
 
-const prevButton = document.getElementById("prev-button");
-const nextButton = document.getElementById("next-button");
-
 const iframeSources = [
   "01 - JavaScript Drum Kit/index-day1.html",
   "02 - JS and CSS Clock/index-day2.html",
@@ -40,20 +37,6 @@ const iframeSources = [
 ];
 
 let currentIframeIndex = 0;
-
-prevButton.addEventListener("click", () => {
-  if (currentIframeIndex > 0) {
-    currentIframeIndex--;
-    changeIframeSource(iframeSources[currentIframeIndex]);
-  }
-});
-
-nextButton.addEventListener("click", () => {
-  if (currentIframeIndex < iframeSources.length - 1) {
-    currentIframeIndex++;
-    changeIframeSource(iframeSources[currentIframeIndex]);
-  }
-});
 
 const tableOfContentLink = document.querySelector(
   'a[href="#table-of-content"]'

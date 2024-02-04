@@ -40,14 +40,6 @@ iframe {
   -o-border-radius: 15%;
 }
 
-#prev-button {
-  left: 10px;
-}
-
-#next-button {
-  right: 10px;
-}
-
 nav {
   background-color: #333;
   color: #fff;
